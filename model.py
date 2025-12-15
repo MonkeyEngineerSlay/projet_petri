@@ -1,4 +1,3 @@
-# model.py
 # (Ce fichier contient la logique : Classes Place, Transition, Arc, PetriNet)
 
 class Place:
@@ -16,7 +15,7 @@ class Arc:
         self.target = target
         self.weight = weight
 
-class PetriNet: # <--- C'est ce nom que interface.py cherche !
+class PetriNet: # C'est ce nom que interface.py cherche
     def __init__(self):
         self.places = {}
         self.transitions = {}

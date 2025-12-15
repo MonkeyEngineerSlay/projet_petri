@@ -1,4 +1,3 @@
-# main.py
 import tkinter as tk
 from interface import PetriApp
 
