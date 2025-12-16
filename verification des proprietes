@@ -1,0 +1,61 @@
+from collections import deque, defaultdict
+
+# Exemple de graphe de reachability
+graphe_reachability = {
+}
+
+# Vérification des propriétés
+def verifier_deadlock(graphe_reachability):
+    return [marquage for marquage, transitions in graphe_reachability.items() if not transitions]
+
+def verifier_bornitude(graphe_reachability, max_jetons=1):
+    for marquage in graphe_reachability.keys():
+        jetons = [int(m) for m in marquage.strip("()").split(",")]
+        if any(j > max_jetons for j in jetons):
+            return False
+    return True
+
+def verifier_vivacite(graphe_reachability):
+    transitions = set()
+    for marquage, arcs in graphe_reachability.items():
+        for transition, _ in arcs:
+            transitions.add(transition)
+    return len(transitions) > 0
+
+def verifier_conservation(graphe_reachability):
+    marquages = list(graphe_reachability.keys())
+    somme_initiale = sum(int(m) for m in marquages[0].strip("()").split(","))
+    for marquage in marquages[1:]:
+        somme = sum(int(m) for m in marquage.strip("()").split(","))
+        if somme != somme_initiale:
+            return False
+    return True
+
+def verifier_transition_invariants(graphe_reachability, marquage_initial):
+    transitions_invariantes = defaultdict(list)
+    for marquage, arcs in graphe_reachability.items():
+        for transition, marquage_suivant in arcs:
+            if marquage_suivant == marquage_initial:
+                transitions_invariantes[marquage].append(transition)
+    return transitions_invariantes
+
+# Générer le tableau récapitulatif
+def generer_tableau_recapitulatif(graphe_reachability, marquage_initial):
+    deadlocks = verifier_deadlock(graphe_reachability)
+    bornitude_ok = verifier_bornitude(graphe_reachability)
+    vivacite_ok = verifier_vivacite(graphe_reachability)
+    conservation_ok = verifier_conservation(graphe_reachability)
+    transition_invariants = verifier_transition_invariants(graphe_reachability, marquage_initial)
+
+    tableau = {
+        "Deadlock": "Aucun" if not deadlocks else "Présents",
+        "Bornitude": "OK" if bornitude_ok else "Non respectée",
+        "Vivacité": "OK" if vivacite_ok else "Non respectée",
+        "Conservation": "OK" if conservation_ok else "Non respectée",
+        "Transition Invariants": transition_invariants,
+    }
+    return tableau
+
+# Exécuter les vérifications
+tableau_recapitulatif = generer_tableau_recapitulatif(graphe_reachability, "(1, 0)")
+print("Tableau récapitulatif des propriétés :", tableau_recapitulatif)
