@@ -1,6 +1,6 @@
 #interface.py
 import tkinter as tk
-from model import PetriNet
+from petri_model import PetriNet
 from editor import PetriEditor
 
 class PetriApp:
