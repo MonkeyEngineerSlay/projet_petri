@@ -135,5 +135,27 @@ class PetriNet: # C'est ce nom que interface.py cherche
             lines.append(f"{s} --{name}--> {t}")
         return "\n".join(lines)
 
+    def remove_node(self, name):
+        """Supprime une Place ou une Transition et nettoie les arcs associés"""
+        if name in self.places:
+            del self.places[name]
+        elif name in self.transitions:
+            del self.transitions[name]
+        else:
+            return False
+
+            # Nettoyage des arcs orphelins
+        self.arcs = [arc for arc in self.arcs
+                     if arc.source.name != name and arc.target.name != name]
+        return True
+
+    def clear(self):
+        """Vide entièrement le réseau (pour le chargement)"""
+        self.places.clear()
+        self.transitions.clear()
+        self.arcs.clear()
+
+    
+
 
 
