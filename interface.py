@@ -1,6 +1,6 @@
-# interface.py
+#interface.py
 import tkinter as tk
-from model import PetriNet
+from petri_model import PetriNet
 from editor import PetriEditor
 
 class PetriApp:
@@ -11,7 +11,7 @@ class PetriApp:
         self.petri_net = PetriNet()
         self.editor = PetriEditor(self.petri_net, self)
         
-        # Données graphiques
+        #Données graphiques
         self.canvas_item_to_name = {}
         self.name_to_coords = {}
         self.place_name_to_text_id = {}
@@ -19,16 +19,17 @@ class PetriApp:
        #Pour déplacer tout le groupe (Forme + Texte)
         self.name_to_ids = {} 
 
-        # --- GUI ---
+        #GUI 
         self.toolbar = tk.Frame(root, bg="#ddd")
         self.toolbar.pack(side=tk.TOP, fill=tk.X)
         
-        # Ajout du bouton MOVE
+        #Ajout du bouton MOVE
         self.create_button("Place", "PLACE")
         self.create_button("Transition", "TRANSITION")
         self.create_button("Arc", "ARC")
-        self.create_button("DÉPLACER", "MOVE", bg="#aaccff") # Nouveau bouton
+        self.create_button("DÉPLACER", "MOVE", bg="#aaccff") #Nouveau bouton
         self.create_button("TIRER", "FIRE", bg="orange")
+        self.create_button("Reachability", "REACH")
 
         self.lbl_mode = tk.Label(self.toolbar, text="Mode: PLACE", fg="blue")
         self.lbl_mode.pack(side=tk.LEFT, padx=20)
@@ -36,10 +37,10 @@ class PetriApp:
         self.canvas = tk.Canvas(root, width=800, height=600, bg="white")
         self.canvas.pack()
         
-        # Bindings (Événements)
+        #Bindings (Événements)
         self.canvas.bind("<Button-1>", self.on_canvas_click)
-        self.canvas.bind("<B1-Motion>", self.on_canvas_drag)      # Quand on glisse
-        self.canvas.bind("<ButtonRelease-1>", self.on_canvas_release) # Quand on lâche
+        self.canvas.bind("<B1-Motion>", self.on_canvas_drag)      #Quand on glisse
+        self.canvas.bind("<ButtonRelease-1>", self.on_canvas_release) #Quand on lâche
 
     def create_button(self, text, mode, bg="SystemButtonFace"):
         tk.Button(self.toolbar, text=text, bg=bg, 
@@ -48,23 +49,23 @@ class PetriApp:
     def update_mode_label(self, text):
         self.lbl_mode.config(text=text)
 
-    # Gestion des événements souris 
+    #Gestion des événements souris 
     def on_canvas_click(self, event):
         item = self.canvas.find_closest(event.x, event.y)
         item_name = self.canvas_item_to_name.get(item[0]) if item else None
         self.editor.handle_click(event.x, event.y, item_name)
 
     def on_canvas_drag(self, event):
-        # On transmet le mouvement à l'éditeur
+        #On transmet le mouvement à l'éditeur
         self.editor.handle_drag(event.x, event.y)
 
     def on_canvas_release(self, event):
         self.editor.handle_release()
 
-    #  Méthodes de dessin 
+    #Méthodes de dessin 
     def draw_place_visual(self, x, y, name, tokens):
         r = 20
-        # On donne un tag commun 'name' pour pouvoir tout retrouver facilement
+        #On donne un tag commun 'name' pour pouvoir tout retrouver facilement
         sid = self.canvas.create_oval(x-r, y-r, x+r, y+r, fill="white", width=2)
         tid = self.canvas.create_text(x, y, text=f"{name}\n({tokens})")
         
@@ -86,13 +87,13 @@ class PetriApp:
         self.name_to_coords[name] = (x, y)
         
         if is_place:
-            # Le 2ème ID est le texte
+            #Le 2ème ID est le texte
             self.place_name_to_text_id[name] = ids[1]
 
     def draw_arc_visual(self, source, target):
         x1, y1 = self.name_to_coords[source]
         x2, y2 = self.name_to_coords[target]
-        # On ajoute le tag "ARC" pour pouvoir les supprimer facilement lors du redessin
+        #On ajoute le tag "ARC" pour pouvoir les supprimer facilement lors du redessin
         self.canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST, width=2, tags="ARC")
 
     def refresh_tokens(self):
@@ -101,27 +102,26 @@ class PetriApp:
             if txt_id:
                 self.canvas.itemconfigure(txt_id, text=f"{name}\n({place.tokens})")
 
-    # Méthode de déplacement
+    #Méthode de déplacement
     def move_object(self, name, new_x, new_y):
-        # 1. Mettre à jour les coordonnées mémorisées
+        #1. Mettre à jour les coordonnées mémorisées
         self.name_to_coords[name] = (new_x, new_y)
         
-        # 2. Calculer le delta (décalage) pour le Canvas.move
-        # Note : canvas.coords est plus précis pour repositionner
+        #2. Calculer le delta (décalage) pour le Canvas.move
         
         ids = self.name_to_ids.get(name)
         if not ids: return
 
-        # Pour simplifier, on redessine ou on déplace. 
-        # Ici on va utiliser coords pour recentrer l'objet sur la souris
+        #Pour simplifier, on redessine ou on déplace. 
+        #Ici on va utiliser coords pour recentrer l'objet sur la souris
         
-        # Si c'est une Place (Rond)
+        #Si c'est une Place (Rond)
         if name.startswith("P"):
             r = 20
             self.canvas.coords(ids[0], new_x-r, new_y-r, new_x+r, new_y+r) # Le rond
             self.canvas.coords(ids[1], new_x, new_y) # Le texte
             
-        # Si c'est une Transition (Carré)
+        #Si c'est une Transition (Carré)
         elif name.startswith("T"):
             w, h = 15, 20
             self.canvas.coords(ids[0], new_x-w, new_y-h, new_x+w, new_y+h) # Le carré
@@ -132,13 +132,35 @@ class PetriApp:
         self.redraw_arrows()
 
     def redraw_arrows(self):
-        # Supprime toutes les lignes existantes
+        #Supprime toutes les lignes existantes
         self.canvas.delete("ARC")
         
-        # Redemande au modèle quels sont les arcs existants
+        #Redemande au modèle quels sont les arcs existants
         for arc in self.petri_net.arcs:
             source_name = arc.source.name
             target_name = arc.target.name
             
-            # Redessine
+            #Redessine
             self.draw_arc_visual(source_name, target_name)
+
+    def show_reachability(self):
+        # 1) construire le graphe d'états à partir du marquage courant
+        self.petri_net.build_reachability_graph()
+
+        # 2) récupérer une représentation texte
+        text = self.petri_net.get_reachability_as_strings()
+
+        # 3) l’afficher dans une nouvelle fenêtre Tk
+        win = tk.Toplevel(self.root)
+        win.title("Graphe de reachability")
+        txt = tk.Text(win, width=80, height=30)
+        txt.pack(fill=tk.BOTH, expand=True)
+        txt.insert("1.0", text)
+        txt.config(state=tk.DISABLED)
+
+    def show_text_window(self, title, text):
+        win = tk.Toplevel(self.root)
+        win.title(title)
+        txt = tk.Text(win, width=80, height=30)
+        txt.pack(fill=tk.BOTH, expand=True)
+        txt.insert("1.0", text)

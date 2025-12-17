@@ -17,6 +17,9 @@ class PetriEditor:
         info = f"Mode: {mode}"
         if mode == "MOVE":
             info = "Mode: DÉPLACEMENT (Glissez-déposez les objets)"
+
+        elif mode == "REACH":
+            info = "Mode: REACHABILITY (clique sur le canvas)"
         
         self.view.update_mode_label(info)
 
@@ -52,6 +55,15 @@ class PetriEditor:
             # Début du déplacement : on mémorise ce qu'on a attrapé
             if item_name:
                 self.drag_item_name = item_name
+
+        elif self.mode == "REACH":
+            # 1) construire le graphe d’états
+            self.model.build_reachability_graph()
+            # 2) générer une chaîne texte
+            text = self.model.get_reachability_as_strings()
+            # 3) demander à la vue de l’afficher
+            self.view.show_text_window("Graphe de reachability", text)
+            return
 
     def handle_drag(self, x, y):
         """Appelé quand la souris bouge avec le bouton enfoncé"""
