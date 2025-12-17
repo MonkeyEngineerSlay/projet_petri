@@ -57,13 +57,17 @@ class PetriEditor:
                 self.drag_item_name = item_name
 
         elif self.mode == "REACH":
-            # 1) construire le graphe d’états
-            self.model.build_reachability_graph()
-            # 2) générer une chaîne texte
-            text = self.model.get_reachability_as_strings()
-            # 3) demander à la vue de l’afficher
-            self.view.show_text_window("Graphe de reachability", text)
-            return
+            from proprietes import analyser_reseau
+
+            resultats = analyser_reseau(self.model)
+            texte = self.model.get_reachability_as_strings()
+
+            texte += "\n\n=== Analyse des propriétés ===\n"
+            for k, v in resultats.items():
+                texte += f"{k} : {v}\n"
+
+            self.view.show_text_window("Reachability & Propriétés", texte)
+
 
     def handle_drag(self, x, y):
         """Appelé quand la souris bouge avec le bouton enfoncé"""
