@@ -124,3 +124,16 @@ class PetriNet: # C'est ce nom que interface.py cherche
         for name, tokens in zip(place_names, marking_tuple):
             self.places[name].tokens = tokens
 
+    def get_reachability_as_strings(self):
+        lines = []
+        lines.append("États (id : marquage) :")
+        for node_id, marking in self.id_to_marking.items():
+            lines.append(f"{node_id} : {marking}")
+        lines.append("")
+        lines.append("Transitions (source --t--> cible) :")
+        for s, t, name in self.edges:
+            lines.append(f"{s} --{name}--> {t}")
+        return "\n".join(lines)
+
+
+
