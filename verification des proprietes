@@ -16,6 +16,8 @@ def verifier_bornitude(graphe_reachability, max_jetons=1):
     return True
 
 def verifier_vivacite(graphe_reachability):
+    if not graphe_reachability:
+        return False
     transitions = set()
     for marquage, arcs in graphe_reachability.items():
         for transition, _ in arcs:
@@ -40,7 +42,7 @@ def verifier_transition_invariants(graphe_reachability, marquage_initial):
     return transitions_invariantes
 
 # Générer le tableau récapitulatif
-def generer_tableau_recapitulatif(graphe_reachability, marquage_initial):
+def generer_tableau_recap(graphe_reachability, marquage_initial):
     deadlocks = verifier_deadlock(graphe_reachability)
     bornitude_ok = verifier_bornitude(graphe_reachability)
     vivacite_ok = verifier_vivacite(graphe_reachability)
@@ -57,5 +59,5 @@ def generer_tableau_recapitulatif(graphe_reachability, marquage_initial):
     return tableau
 
 # Exécuter les vérifications
-tableau_recapitulatif = generer_tableau_recapitulatif(graphe_reachability, "(1, 0)")
-print("Tableau récapitulatif des propriétés :", tableau_recapitulatif)
+tableau_recap = generer_tableau_recap(graphe_reachability, "(1, 0)")
+print("Tableau récapitulatif des propriétés :", tableau_recap)
