@@ -1,72 +1,67 @@
-class Place:
-    def __init__(self, name, jetons):
-        self.name = name
-        self.jetons = jetons
+# test_petri.py
+import pytest
+from model import PetriNet
+from analysis import PetriAnalyzer
 
-class Arc:
-    def __init__(self, input, cible, weight):
-        self.input = input  # entré
-        self.cible = cible  # nom transition ou place
-        self.weight = weight 
+def test_creation():
+    """Vérifie qu'on peut créer des places et transitions"""
+    net = PetriNet()
+    net.add_place("P1", 1)
+    net.add_transition("T1")
+    net.add_arc("P1", "T1")
+    
+    assert "P1" in net.places
+    assert net.places["P1"].tokens == 1
+    assert len(net.arcs) == 1
 
-class Transition:
-    def __init__(self, name):
-        self.name = name
+def test_firing():
+    """Vérifie la logique de tir"""
+    net = PetriNet()
+    net.add_place("P1", 1)
+    net.add_place("P2", 0)
+    net.add_transition("T1")
+    
+    net.add_arc("P1", "T1")
+    net.add_arc("T1", "P2")
+    
+    # Avant tir
+    assert net.places["P1"].tokens == 1
+    assert net.places["P2"].tokens == 0
+    assert net.is_enabled("T1") == True
+    
+    # Tir
+    success = net.fire("T1")
+    
+    # Après tir
+    assert success == True
+    assert net.places["P1"].tokens == 0
+    assert net.places["P2"].tokens == 1
+    assert net.is_enabled("T1") == False
 
-class Petri:
-    def __init__(self):
-        self.places = {}
-        self.transitions = {}
-        self.arcs = []
+def test_deadlock_analysis():
+    """Vérifie si l'analyseur détecte un blocage"""
+    net = PetriNet()
+    # P1 -> T1 -> P2 (P2 ne va nulle part, c'est un état final)
+    net.add_place("P1", 1)
+    net.add_place("P2", 0)
+    net.add_transition("T1")
+    net.add_arc("P1", "T1")
+    net.add_arc("T1", "P2")
+    
+    analyzer = PetriAnalyzer(net)
+    props = analyzer.analyze_properties()
+    
+    # Il doit y avoir 2 états : (P1=1, P2=0) et (P1=0, P2=1)
+    assert props["state_count"] == 2
+    # L'état final (P1=0, P2=1) est un deadlock car T1 ne peut plus tirer
+    assert len(props["deadlocks"]) == 1
 
-    def add_place(self, name, jetons):
-        self.places[name] = Place(name, jetons)
-
-    def add_transition(self, name):
-        self.transitions[name] = Transition(name)
-
-    def add_arc(self, input_name,cible_name, weight):
-        input=self.places.get(input_name) or self.transitions.get(input_name)
-        cible=self.places.get(cible_name) or self.transitions.get(cible_name)
-        self.arcs.append(Arc(input, cible, weight))
-    #vérifier si une transition est franchissable
-    def is_enabled(self, transition_name):
-        transition = self.transitions[transition_name]
-        #vérifiier pour chaque arc s'il y a assez de jetons pour passer
-        for arc in self.arcs:
-            if arc.target == transition:
-                if arc.source.tokens < arc.weight:
-                    return False
-        return True
-
-    def fire(self, transition_name):
-        if not self.is_enabled(transition_name):
-            return False
-        transition = self.transitions[transition_name]
-        #retirer les jetons des places d'entrée
-        for arc in self.arcs:
-            if arc.target == transition:
-                arc.source.tokens -= arc.weight
-        #ajouter les jetons aux places de sortie
-        for arc in self.arcs:
-            if arc.source == transition:
-                arc.target.tokens += arc.weight
-        return True
-
-petri = Petri()
-
-petri.add_place("P1", 1)
-petri.add_place("P2", 1)
-
-#ARC
-#arc1 = Arc("P1", "T1", 1)
-#arc2 = Arc("T1", "P2", 1)
-
-petri.add_transition("T1")
-
-petri.add_arc("P1", "T1", 1)
-
-print(petri.places)
-print(petri.transitions)
-print(petri.arcs)
-
+if __name__ == "__main__":
+    # Permet de lancer le test sans pytest installé via "python test_petri.py"
+    try:
+        test_creation()
+        test_firing()
+        test_deadlock_analysis()
+        print("Tous les tests sont passés avec SUCCÈS !")
+    except AssertionError as e:
+        print(f"ÉCHEC du test : {e}")
