@@ -29,6 +29,7 @@ class PetriApp:
         self.create_button("Arc", "ARC")
         self.create_button("DÉPLACER", "MOVE", bg="#aaccff") #Nouveau bouton
         self.create_button("TIRER", "FIRE", bg="orange")
+        self.create_button("Reachability", "REACH")
 
         self.lbl_mode = tk.Label(self.toolbar, text="Mode: PLACE", fg="blue")
         self.lbl_mode.pack(side=tk.LEFT, padx=20)
@@ -141,3 +142,25 @@ class PetriApp:
             
             #Redessine
             self.draw_arc_visual(source_name, target_name)
+
+    def show_reachability(self):
+        # 1) construire le graphe d'états à partir du marquage courant
+        self.petri_net.build_reachability_graph()
+
+        # 2) récupérer une représentation texte
+        text = self.petri_net.get_reachability_as_strings()
+
+        # 3) l’afficher dans une nouvelle fenêtre Tk
+        win = tk.Toplevel(self.root)
+        win.title("Graphe de reachability")
+        txt = tk.Text(win, width=80, height=30)
+        txt.pack(fill=tk.BOTH, expand=True)
+        txt.insert("1.0", text)
+        txt.config(state=tk.DISABLED)
+
+    def show_text_window(self, title, text):
+        win = tk.Toplevel(self.root)
+        win.title(title)
+        txt = tk.Text(win, width=80, height=30)
+        txt.pack(fill=tk.BOTH, expand=True)
+        txt.insert("1.0", text)
