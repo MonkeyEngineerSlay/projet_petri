@@ -191,3 +191,34 @@ class PetriApp:
         self.canvas_item_to_name.clear()
         self.name_to_coords.clear()
         self.name_to_ids.clear()
+
+    def show_reachability_graph(self):
+        self.petri_net.build_reachability_graph()
+
+        win = tk.Toplevel(self.root)
+        win.title("Reachability graph")
+        canvas = tk.Canvas(win, width=800, height=600, bg="white")
+        canvas.pack(fill=tk.BOTH, expand=True)
+
+        # 1) placer les états en cercle
+        node_pos = {}
+        n = len(self.petri_net.id_to_marking)
+        R = 200
+        cx, cy = 400, 300
+        for idx, (node_id, marking) in enumerate(self.petri_net.id_to_marking.items()):
+            angle = 2 * 3.14159 * idx / max(n, 1)
+            x = cx + R * (0.8 * (1 if n == 1 else 1)) * (float(__import__("math").cos(angle)))
+            y = cy + R * (float(__import__("math").sin(angle)))
+            node_pos[node_id] = (x, y)
+            r = 35
+            canvas.create_oval(x - r, y - r, x + r, y + r, fill="#ecf0f1")
+            label = f"{node_id}: {marking}"
+            canvas.create_text(x, y, text=label)
+
+        # 2) tracer les arcs
+        for src, dst, t_name in self.petri_net.edges:
+            x1, y1 = node_pos[src]
+            x2, y2 = node_pos[dst]
+            canvas.create_line(x1, y1, x2, y2, arrow=tk.LAST)
+            mx, my = (x1 + x2) / 2, (y1 + y2) / 2
+            canvas.create_text(mx, my - 10, text=t_name, fill="blue")
