@@ -158,4 +158,3 @@ class PetriNet: # C'est ce nom que interface.py cherche
     
 
 
-

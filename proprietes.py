@@ -22,10 +22,12 @@ def verifier_deadlock(graphe):
 
 
 def verifier_bornitude(graphe, max_tokens=1):
-    for marquage in graphe:
-        if any(j > max_tokens for j in marquage):
-            return False
+    for marquage in graphe.keys():
+        for jeton in marquage:  # Parcourir chaque élément du tuple
+            if jeton > max_tokens:
+                return False
     return True
+
 
 
 def verifier_conservation(graphe):

@@ -1,3 +1,4 @@
+#test_petri.py
 class Place:
     def __init__(self, name, jetons):
         self.name = name
