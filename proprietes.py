@@ -39,7 +39,7 @@ def verifier_conservation(graphe):
 def verifier_vivacite_faible(graphe):
     transitions = set()
     for arcs in graphe.values():
-        for t, _ in arcs:
+        for t, in arcs:
             transitions.add(t)
     return len(transitions) > 0
 
