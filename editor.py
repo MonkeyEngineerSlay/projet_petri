@@ -21,7 +21,9 @@ class PetriEditor:
             info = "Mode: DÉPLACEMENT (Glissez-déposez les objets)"
 
         elif mode == "REACH":
-            info = "Mode: REACHABILITY (clique sur le canvas)"
+            #info = "Mode: REACHABILITY (clique sur le canvas)"
+            self.view.show_reachability_graph()
+            return
 
         elif mode == "SAVE":
             self.save_project()
@@ -40,8 +42,8 @@ class PetriEditor:
             tokens = self.view.ask_token_number()
             if tokens is None: return
             name = f"P{len(self.model.places)}"
-            self.model.add_place(name, 1)
-            self.view.draw_place_visual(x, y, name, 1)
+            self.model.add_place(name, tokens)
+            self.view.draw_place_visual(x, y, name, tokens)
 
         elif self.mode == "TRANSITION":
             name = f"T{len(self.model.transitions)}"
