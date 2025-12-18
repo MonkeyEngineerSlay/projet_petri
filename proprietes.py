@@ -43,8 +43,12 @@ def verifier_vivacite_faible(graphe):
 
 
 def analyser_reseau(net):
+    saved_marking = net.get_marking_tuple()
+
     net.build_reachability_graph()
     graphe = construire_graphe_reachability(net)
+
+    net._load_marking_tuple(saved_marking)
 
     return {
         "Deadlocks": verifier_deadlock(graphe),
