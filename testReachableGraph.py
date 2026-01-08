@@ -5,16 +5,22 @@ sys.path.append(os.path.dirname(__file__))
 
 from petri_model import PetriNet
 
+
+def reachability_graph():
+    net = PetriNet()
+    net.add_place("p1", 1)
+    net.add_place("p2", 0)
+    net.add_transition("t1")
+    net.add_arc("p1", "t1", 1)
+    net.add_arc("t1", "p2", 1)
+
+    net.build_reachability_graph()
+    return net
+
+
 class TestReachability(unittest.TestCase):
     def test_simple_net(self):
-        net = PetriNet()
-        net.add_place("p1", 1)
-        net.add_place("p2", 0)
-        net.add_transition("t1")
-        net.add_arc("p1", "t1", 1)
-        net.add_arc("t1", "p2", 1)
-
-        net.build_reachability_graph()
+        net=reachability_graph()
 
         print("=== États (nœuds) ===")
         for node_id, marking in net.id_to_marking.items():

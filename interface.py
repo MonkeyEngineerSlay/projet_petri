@@ -1,5 +1,7 @@
 #interface.py
 import tkinter as tk
+import math
+
 from tkinter import simpledialog
 from tkinter import ttk  # Nécessaire pour le menu déroulant (Combobox)
 from model import PetriNet
@@ -327,15 +329,15 @@ class PetriApp:
         canvas = tk.Canvas(win, width=800, height=600, bg="white")
         canvas.pack(fill=tk.BOTH, expand=True)
 
-        # Placement nœuds (CERVEAU DU BUG)
+        # Placement noeuds
         node_pos = {}
         n = len(self.petri_net.id_to_marking)  # ← SI n=1 → 1 seul nœud !
         R = 200
         cx, cy = 400, 300
         for idx, (node_id, marking) in enumerate(self.petri_net.id_to_marking.items()):
             angle = 2 * 3.14159 * idx / max(n, 1)
-            x = cx + R * (0.8 * (1 if n == 1 else 1)) * (float(_import_("math").cos(angle)))
-            y = cy + R * (float(_import_("math").sin(angle)))
+            x = cx + R * (0.8 * (1 if n == 1 else 1)) * (float(math.cos(angle)))
+            y = cy + R * (float(math.sin(angle)))
             node_pos[node_id] = (x, y)
             r = 35
             canvas.create_oval(x - r, y - r, x + r, y + r, fill="#ecf0f1")

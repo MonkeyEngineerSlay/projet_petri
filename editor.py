@@ -96,6 +96,17 @@ class PetriEditor:
 
         # --- MODE ANALYSE (Reachability) ---
         elif self.mode == "REACH":
+            from proprietes import analyser_reseau
+
+            resultats = analyser_reseau(self.model)
+            texte = self.model.get_reachability_as_strings()
+
+            texte += "\n\n=== Analyse des propriétés ===\n"
+            for k, v in resultats.items():
+                texte += f"{k} : {v}\n"
+
+            self.view.show_text_window("Reachability & Propriétés", texte)
+
             # Construction et affichage du graphe
             self.model.build_reachability_graph()
             text = self.model.get_reachability_as_strings()

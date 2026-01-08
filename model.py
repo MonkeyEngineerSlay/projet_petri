@@ -115,7 +115,8 @@ class PetriNet:
                 sorted_tokens = tuple(sorted(str(t) for t in safe_tokens))
                 marking_list.append(sorted_tokens)
             
-        return tuple(marking_list)
+            return tuple(marking_list)
+
     def _load_marking_tuple(self, marking_tuple):
         """Restaure le réseau dans un état précis (Logique Mahdi)."""
         place_names = sorted(self.places.keys())
